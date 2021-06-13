@@ -6,36 +6,59 @@ Public Sub function_exe()
     Dim password As Variant
     password = 1234
     
-    ' ブックの保護解除
+    ' 2. ブックの保護解除
     Call Module1.workbook_unprotect(password)
     
-    ' シートの保護解除
+    ' 4. シートの保護解除
     Call Module1.worksheet_unprotect(password)
     
-    ' シートの保護
+    ' 5. ファイルを開いて、ファイル名を取得
+    Dim file_name As String
+    file_name = Module1.file_open()
+    
+    ' 3. シートの保護
     Call Module1.worksheet_protect(password)
     
-    ' ブックの保護
+    ' 1. ブックの保護
     Call Module1.workbook_protect(password)
+    
 End Sub
 
-' ブックの保護
+' 1. ブックの保護
 Private Sub workbook_protect(password As Variant)
     ThisWorkbook.Protect (password)
 End Sub
 
-' ブックの保護解除
+' 2. ブックの保護解除
 Private Sub workbook_unprotect(password As Variant)
     ThisWorkbook.Unprotect (password)
 End Sub
 
-' シートの保護
+' 3. シートの保護
 Private Sub worksheet_protect(password As Variant)
     ThisWorkbook.Worksheets(1).Protect (password)
 End Sub
 
-' シートの解除
+' 4. シートの解除
 Private Sub worksheet_unprotect(password As Variant)
     ThisWorkbook.Worksheets(1).Unprotect (password)
 End Sub
 
+' 5. ファイルを開いて、ファイル名を取得
+Private Function file_open() As String
+    
+    ' カレントディレクトりの設定
+    CreateObject("WScript.Shell").currentdirectory = ThisWorkbook.Path
+    
+    ' ファイル名を取得
+    Dim file_name As Variant
+    file_name = Application.GetOpenFilename()
+    
+    If file_name = False Then
+        Exit Function
+    Else
+        Workbooks.Open Filename:=file_name
+        file_open = Application.ActiveWorkbook.Name
+    End If
+    
+End Function
