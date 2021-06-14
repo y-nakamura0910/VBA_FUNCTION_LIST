@@ -3,7 +3,7 @@ Option Explicit
 Public Sub function_exe()
 
     ' パスワードの指定
-    Dim password As Variant
+    Dim password As String
     password = 1234
     
     ' 2. ブックの保護解除
@@ -14,7 +14,11 @@ Public Sub function_exe()
     
     ' 5. ファイルを開いて、ファイル名を取得
     Dim file_name As String
-    file_name = Module1.file_open()
+    file_name = Module1.file_open(password)
+    
+    ' 6. シート名を指定
+    Dim sheet_name As String
+    sheet_name = Module1.get_sheet_name(file_name, password)
     
     ' 3. シートの保護
     Call Module1.worksheet_protect(password)
@@ -25,40 +29,85 @@ Public Sub function_exe()
 End Sub
 
 ' 1. ブックの保護
-Private Sub workbook_protect(password As Variant)
+Private Sub workbook_protect(password As String)
     ThisWorkbook.Protect (password)
 End Sub
 
 ' 2. ブックの保護解除
-Private Sub workbook_unprotect(password As Variant)
+Private Sub workbook_unprotect(password As String)
     ThisWorkbook.Unprotect (password)
 End Sub
 
 ' 3. シートの保護
-Private Sub worksheet_protect(password As Variant)
+Private Sub worksheet_protect(password As String)
     ThisWorkbook.Worksheets(1).Protect (password)
 End Sub
 
 ' 4. シートの解除
-Private Sub worksheet_unprotect(password As Variant)
+Private Sub worksheet_unprotect(password As String)
     ThisWorkbook.Worksheets(1).Unprotect (password)
 End Sub
 
 ' 5. ファイルを開いて、ファイル名を取得
-Private Function file_open() As String
+Private Function file_open(password As String) As String
     
-    ' カレントディレクトりの設定
+    ' カレントディレクトリの設定
     CreateObject("WScript.Shell").currentdirectory = ThisWorkbook.Path
     
     ' ファイル名を取得
-    Dim file_name As Variant
-    file_name = Application.GetOpenFilename()
+    Dim file_path As Variant
+    file_path = Application.GetOpenFilename()
     
-    If file_name = False Then
-        Exit Function
+    If file_path = False Then
+        Call Module1.worksheet_protect(password)
+        Call Module1.workbook_protect(password)
+        End
     Else
-        Workbooks.Open Filename:=file_name
-        file_open = Application.ActiveWorkbook.Name
+        Workbooks.Open Filename:=file_path
+        file_open = ActiveWorkbook.Name
     End If
     
+End Function
+
+' 6. シート名を指定
+Private Function get_sheet_name(file_name As String, password As String) As String
+
+    ' シート名を入力
+    Dim sheet_name As Variant
+    sheet_name = Application.InputBox(Prompt:="シート名", Type:=2)
+    
+    ' 7. 入力したシート名が存在するか判定
+    Dim exist_worksheet As Boolean
+    exist_worksheet = judge_exist_worksheet(sheet_name)
+    
+    If sheet_name = False Then
+        Workbooks(file_name).Close
+        Call Module1.worksheet_protect(password)
+        Call Module1.workbook_protect(password)
+        End
+    ElseIf exist_worksheet = False Then
+        MsgBox "入力された名前のシート名が存在しません"
+        get_sheet_name = Module1.get_sheet_name(file_name, password)
+    Else
+        get_sheet_name = sheet_name
+        Worksheets(sheet_name).Activate
+        Exit Function
+    End If
+    
+End Function
+
+' 7. 入力したシート名が存在するか判定
+Private Function judge_exist_worksheet(sheet_name As Variant)
+
+    Dim ws As Worksheet
+    
+    For Each ws In ActiveWorkbook.Sheets
+        If ws.Name = sheet_name Then
+            judge_exist_worksheet = True
+            Exit Function
+        End If
+    Next
+    
+    judge_exist_worksheet = False
+
 End Function
