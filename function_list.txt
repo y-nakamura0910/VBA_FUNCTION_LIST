@@ -13,12 +13,26 @@ Public Sub function_exe()
     Call Module1.worksheet_unprotect(password)
     
     ' 5. ファイルを開いて、ファイル名を取得
-    Dim file_name As String
-    file_name = Module1.file_open(password)
+    Dim source_file_name As String
+    source_file_name = Module1.file_open(password)
     
     ' 6. シート名を指定
-    Dim sheet_name As String
-    sheet_name = Module1.get_sheet_name(file_name, password)
+    Dim source_sheet_name As String
+    source_sheet_name = Module1.get_sheet_name(source_file_name, password)
+    
+    ' 8. データソースシート
+    Dim data_source_sheet As Worksheet
+    Set data_source_sheet = Workbooks(source_file_name).Worksheets(source_sheet_name)
+    
+    ' 9. データソース開始行の指定
+    Dim data_source_start_row As Long
+    data_source_start_row = 9
+    
+    ' 10. データソース終了行の指定
+    Dim data_source_column As String
+    Dim data_source_end_row As Long
+    data_source_column = "B"
+    data_source_end_row = get_end_row(data_source_column, data_source_sheet)
     
     ' 3. シートの保護
     Call Module1.worksheet_protect(password)
@@ -64,14 +78,14 @@ Private Function file_open(password As String) As String
         End
     Else
         Workbooks.Open Filename:=file_path
-        file_open = ActiveWorkbook.Name
+        file_open = Application.ActiveWorkbook.Name
     End If
     
 End Function
 
 ' 6. シート名を指定
-Private Function get_sheet_name(file_name As String, password As String) As String
-
+Private Function get_sheet_name(source_file_name As String, password As String) As String
+    
     ' シート名を入力
     Dim sheet_name As Variant
     sheet_name = Application.InputBox(Prompt:="シート名", Type:=2)
@@ -81,24 +95,24 @@ Private Function get_sheet_name(file_name As String, password As String) As Stri
     exist_worksheet = judge_exist_worksheet(sheet_name)
     
     If sheet_name = False Then
-        Workbooks(file_name).Close
+        Workbooks(source_file_name).Close
         Call Module1.worksheet_protect(password)
         Call Module1.workbook_protect(password)
         End
     ElseIf exist_worksheet = False Then
         MsgBox "入力された名前のシート名が存在しません"
-        get_sheet_name = Module1.get_sheet_name(file_name, password)
+        Workbooks(source_file_name).Close
+        Call Module1.worksheet_protect(password)
+        Call Module1.workbook_protect(password)
+        End
     Else
         get_sheet_name = sheet_name
-        Worksheets(sheet_name).Activate
         Exit Function
     End If
     
 End Function
 
-' 7. 入力したシート名が存在するか判定
 Private Function judge_exist_worksheet(sheet_name As Variant)
-
     Dim ws As Worksheet
     
     For Each ws In ActiveWorkbook.Sheets
@@ -111,3 +125,10 @@ Private Function judge_exist_worksheet(sheet_name As Variant)
     judge_exist_worksheet = False
 
 End Function
+
+' 10. データソース終了行の指定
+Private Function get_end_row(data_source_column As String, data_source_sheet As Worksheet) As Long
+    data_source_sheet.Activate
+    get_end_row = Cells(Rows.Count, data_source_column).End(xlUp).Row
+End Function
+
