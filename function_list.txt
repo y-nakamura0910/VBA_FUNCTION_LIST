@@ -21,24 +21,29 @@ Public Sub function_exe()
     source_sheet_name = Module1.get_sheet_name(source_file_name, password)
     
     ' 8. データソースシート
-    Dim data_source_sheet As Worksheet
-    Set data_source_sheet = Workbooks(source_file_name).Worksheets(source_sheet_name)
+    Dim source_sheet As Worksheet
+    Set source_sheet = Workbooks(source_file_name).Worksheets(source_sheet_name)
     
     ' 9. データソース開始行の指定
-    Dim data_source_start_row As Long
-    data_source_start_row = 9
+    Dim source_start_row As Long
+    source_start_row = 9
     
     ' 10. データソース終了行の指定
-    Dim data_source_column As String
-    Dim data_source_end_row As Long
-    data_source_column = "B"
-    data_source_end_row = get_end_row(data_source_column, data_source_sheet)
+    Dim source_column As String
+    Dim source_end_row As Long
+    source_column = "B"
+    source_end_row = get_end_row(source_column, source_sheet)
     
     ' 11. 出力先のファイル作成
-    Dim export_file_name As String
-    export_file_name = create_export_file(source_file_name, password)
+    Dim dest_file_name As String
+    dest_file_name = create_dest_file(source_file_name, password)
+
+    ' 12. 出力先のシートの指定
+    Dim dest_sheet As Worksheet
+    Set dest_sheet = Workbooks(dest_file_name).Worksheets("Sheet1")
     
-    MsgBox export_file_name
+    ' 13. タイトルの転記
+    Call Module1.transcribe_title(source_sheet, dest_sheet, source_start_row)
     
     ' 3. シートの保護
     Call Module1.worksheet_protect(password)
@@ -133,35 +138,47 @@ Private Function judge_exist_worksheet(sheet_name As Variant)
 End Function
 
 ' 10. データソース終了行の指定
-Private Function get_end_row(data_source_column As String, data_source_sheet As Worksheet) As Long
-    data_source_sheet.Activate
-    get_end_row = Cells(Rows.Count, data_source_column).End(xlUp).Row
+Private Function get_end_row(source_column As String, source_sheet As Worksheet) As Long
+    source_sheet.Activate
+    get_end_row = Cells(Rows.Count, source_column).End(xlUp).Row
 End Function
 
 ' 11. 出力先のファイル作成
-Private Function create_export_file(source_file_name As String, password As String) As String
+Private Function create_dest_file(source_file_name As String, password As String) As String
     
-    Dim export_file_name As Variant
-    Dim export_file_path As Variant
-    Dim export_file As Workbook
-    export_file_name = Application.InputBox(prompt:="出力ファイル名", Type:=2)
+    Dim dest_file_name As Variant
+    Dim dest_file_path As Variant
+    Dim dest_file As Workbook
+    dest_file_name = Application.InputBox(prompt:="出力ファイル名", Type:=2)
     
-    If export_file_name = False Then
+    If dest_file_name = False Then
         Workbooks(source_file_name).Close
         Call Module1.worksheet_protect(password)
         Call Module1.workbook_protect(password)
         End
     Else
-        export_file_path = ThisWorkbook.Path & "\" & export_file_name & ".xlsx"
+        dest_file_path = ThisWorkbook.Path & "\" & dest_file_name & ".xlsx"
     End If
     
-    If Dir(export_file_path) = "" Then
-        Set export_file = Workbooks.Add
-        export_file.SaveAs export_file_path
-        create_export_file = Application.ActiveWorkbook.Name
+    If Dir(dest_file_path) = "" Then
+        Set dest_file = Workbooks.Add
+        dest_file.SaveAs dest_file_path
+        create_dest_file = Application.ActiveWorkbook.Name
     Else
-        MsgBox "既に" & export_file_name & "というファイルは存在します"
-        create_export_file = create_export_file(source_file_name, password)
+        MsgBox "既に" & dest_file_name & "というファイルは存在します"
+        create_dest_file = create_dest_file(source_file_name, password)
     End If
         
 End Function
+
+' 13. タイトルの転記
+Private Sub transcribe_title(source_sheet As Worksheet, dest_sheet As Worksheet, source_start_row As Long)
+
+    Dim i As Long
+    
+    For i = 1 To source_start_row - 1
+        dest_sheet.Range(dest_sheet.Cells(i, 1), dest_sheet.Cells(i, source_sheet.Cells(i, source_sheet.Columns.Count).End(xlToLeft).Column)) = _
+        source_sheet.Range(source_sheet.Cells(i, 1), source_sheet.Cells(i, source_sheet.Cells(i, source_sheet.Columns.Count).End(xlToLeft).Column)).Value
+    Next i
+    
+End Sub
