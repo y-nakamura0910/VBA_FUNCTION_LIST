@@ -34,6 +34,12 @@ Public Sub function_exe()
     data_source_column = "B"
     data_source_end_row = get_end_row(data_source_column, data_source_sheet)
     
+    ' 11. 出力先のファイル作成
+    Dim export_file_name As String
+    export_file_name = create_export_file(source_file_name, password)
+    
+    MsgBox export_file_name
+    
     ' 3. シートの保護
     Call Module1.worksheet_protect(password)
     
@@ -88,7 +94,7 @@ Private Function get_sheet_name(source_file_name As String, password As String) 
     
     ' シート名を入力
     Dim sheet_name As Variant
-    sheet_name = Application.InputBox(Prompt:="シート名", Type:=2)
+    sheet_name = Application.InputBox(prompt:="シート名", Type:=2)
     
     ' 7. 入力したシート名が存在するか判定
     Dim exist_worksheet As Boolean
@@ -101,10 +107,9 @@ Private Function get_sheet_name(source_file_name As String, password As String) 
         End
     ElseIf exist_worksheet = False Then
         MsgBox "入力された名前のシート名が存在しません"
-        Workbooks(source_file_name).Close
         Call Module1.worksheet_protect(password)
         Call Module1.workbook_protect(password)
-        End
+        get_sheet_name = get_sheet_name(source_file_name, password)
     Else
         get_sheet_name = sheet_name
         Exit Function
@@ -113,6 +118,7 @@ Private Function get_sheet_name(source_file_name As String, password As String) 
 End Function
 
 Private Function judge_exist_worksheet(sheet_name As Variant)
+
     Dim ws As Worksheet
     
     For Each ws In ActiveWorkbook.Sheets
@@ -132,3 +138,30 @@ Private Function get_end_row(data_source_column As String, data_source_sheet As 
     get_end_row = Cells(Rows.Count, data_source_column).End(xlUp).Row
 End Function
 
+' 11. 出力先のファイル作成
+Private Function create_export_file(source_file_name As String, password As String) As String
+    
+    Dim export_file_name As Variant
+    Dim export_file_path As Variant
+    Dim export_file As Workbook
+    export_file_name = Application.InputBox(prompt:="出力ファイル名", Type:=2)
+    
+    If export_file_name = False Then
+        Workbooks(source_file_name).Close
+        Call Module1.worksheet_protect(password)
+        Call Module1.workbook_protect(password)
+        End
+    Else
+        export_file_path = ThisWorkbook.Path & "\" & export_file_name & ".xlsx"
+    End If
+    
+    If Dir(export_file_path) = "" Then
+        Set export_file = Workbooks.Add
+        export_file.SaveAs export_file_path
+        create_export_file = Application.ActiveWorkbook.Name
+    Else
+        MsgBox "既に" & export_file_name & "というファイルは存在します"
+        create_export_file = create_export_file(source_file_name, password)
+    End If
+        
+End Function
