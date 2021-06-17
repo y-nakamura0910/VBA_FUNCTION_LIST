@@ -45,6 +45,13 @@ Public Sub function_exe()
     ' 13. タイトルの転記
     Call Module1.transcribe_title(source_sheet, dest_sheet, source_start_row)
     
+    ' 14. データ転記開始行
+    Dim dest_row_count As Long
+    dest_row_count = source_start_row
+    
+    ' 15. データ転記
+    Call Module1.transcribe_data(source_sheet, dest_sheet, source_start_row, source_end_row, dest_row_count)
+    
     ' 3. シートの保護
     Call Module1.worksheet_protect(password)
     
@@ -181,4 +188,30 @@ Private Sub transcribe_title(source_sheet As Worksheet, dest_sheet As Worksheet,
         source_sheet.Range(source_sheet.Cells(i, 1), source_sheet.Cells(i, source_sheet.Cells(i, source_sheet.Columns.Count).End(xlToLeft).Column)).Value
     Next i
     
+End Sub
+
+' 15. データ転記
+Private Sub transcribe_data(source_sheet As Worksheet, dest_sheet As Worksheet, source_start_row As Long, source_end_row As Long, dest_row_count As Long)
+    
+    Dim ary_data As Variant
+    Dim ary_title As Variant
+    Dim i As Long
+    Dim j As Long
+    
+    For j = 3 To source_sheet.Cells(source_start_row - 1, source_sheet.Columns.Count).End(xlToLeft).Column
+        ary_data = Array()
+        ary_title = Array()
+        
+        For i = 0 To source_end_row - source_start_row
+            ReDim Preserve ary_data(UBound(ary_data) + 1)
+            ary_data(i) = source_sheet.Cells(i + source_start_row, j)
+            ReDim Preserve ary_title(UBound(ary_title) + 1)
+            ary_title(i) = source_sheet.Cells(i + source_start_row, j - 1)
+            If IsNumeric(ary_data(i)) = True And ary_data(i) <> 0 Then
+                dest_sheet.Cells(dest_row_count, j) = ary_data(i)
+                dest_sheet.Cells(dest_row_count, j - 1) = ary_title(i)
+            End If
+        Next i
+    Next j
+        
 End Sub
