@@ -20,37 +20,29 @@ Public Sub function_exe()
     Dim source_sheet_name As String
     source_sheet_name = Module1.get_sheet_name(source_file_name, password)
     
-    ' 8. データソースシート
+    ' データソースシート
     Dim source_sheet As Worksheet
     Set source_sheet = Workbooks(source_file_name).Worksheets(source_sheet_name)
     
-    ' 9. データソース開始行の指定
+    ' データソース開始行の指定
     Dim source_start_row As Long
     source_start_row = 9
     
-    ' 10. データソース終了行の指定
+    ' 8. データソース終了行の指定
     Dim source_column As String
     Dim source_end_row As Long
     source_column = "B"
     source_end_row = get_end_row(source_column, source_sheet)
     
-    ' 11. 出力先のファイル作成
-    Dim dest_file_name As String
-    dest_file_name = create_dest_file(source_file_name, password)
+    ' 9. 出力先のファイル作成　⇒　データの転記
+    
+    ' Call Module1.create_dest_file_and_transcribe_data(source_file_name, source_sheet, source_start_row, source_end_row, password)
 
-    ' 12. 出力先のシートの指定
-    Dim dest_sheet As Worksheet
-    Set dest_sheet = Workbooks(dest_file_name).Worksheets("Sheet1")
     
-    ' 13. タイトルの転記
-    Call Module1.transcribe_title(source_sheet, dest_sheet, source_start_row)
+    ' 13. 出力先のフォルダ指定　⇒　データの転記
     
-    ' 14. データ転記開始行
-    Dim dest_row_count As Long
-    dest_row_count = source_start_row
+    Call Module1.get_folder_name_and_transcribe_data(source_file_name, source_sheet, source_start_row, source_end_row, password)
     
-    ' 15. データ転記
-    Call Module1.transcribe_data(source_sheet, dest_sheet, source_start_row, source_end_row, dest_row_count)
     
     ' 3. シートの保護
     Call Module1.worksheet_protect(password)
@@ -129,6 +121,7 @@ Private Function get_sheet_name(source_file_name As String, password As String) 
     
 End Function
 
+' 7. 入力したシート名が存在するか判定
 Private Function judge_exist_worksheet(sheet_name As Variant)
 
     Dim ws As Worksheet
@@ -144,13 +137,36 @@ Private Function judge_exist_worksheet(sheet_name As Variant)
 
 End Function
 
-' 10. データソース終了行の指定
+' 8. データソース終了行の指定
 Private Function get_end_row(source_column As String, source_sheet As Worksheet) As Long
     source_sheet.Activate
     get_end_row = Cells(Rows.Count, source_column).End(xlUp).Row
 End Function
 
-' 11. 出力先のファイル作成
+' 9. 出力先のファイル作成　⇒　データの転記
+Private Sub create_dest_file_and_transcribe_data(source_file_name As String, source_sheet As Worksheet, source_start_row As Long, source_end_row As Long, password As String)
+
+    ' 出力先のファイル作成
+    Dim dest_file_name As String
+    dest_file_name = create_dest_file(source_file_name, password)
+
+    ' 10. 出力先のシートの指定
+    Dim dest_sheet As Worksheet
+    Set dest_sheet = Workbooks(dest_file_name).Worksheets("Sheet1")
+
+    ' 11. タイトルの転記
+    Call Module1.transcribe_title(source_sheet, dest_sheet, source_start_row)
+
+    ' データ転記開始行
+    Dim dest_row_count As Long
+    dest_row_count = source_start_row
+
+    ' 12. データ転記
+    Call Module1.transcribe_data(source_sheet, dest_sheet, source_start_row, source_end_row, dest_row_count)
+
+End Sub
+
+' 10. 出力先のファイル作成
 Private Function create_dest_file(source_file_name As String, password As String) As String
     
     Dim dest_file_name As Variant
@@ -178,7 +194,7 @@ Private Function create_dest_file(source_file_name As String, password As String
         
 End Function
 
-' 13. タイトルの転記
+' 11. タイトルの転記
 Private Sub transcribe_title(source_sheet As Worksheet, dest_sheet As Worksheet, source_start_row As Long)
 
     Dim i As Long
@@ -190,7 +206,7 @@ Private Sub transcribe_title(source_sheet As Worksheet, dest_sheet As Worksheet,
     
 End Sub
 
-' 15. データ転記
+' 12. データ転記
 Private Sub transcribe_data(source_sheet As Worksheet, dest_sheet As Worksheet, source_start_row As Long, source_end_row As Long, dest_row_count As Long)
     
     Dim ary_data As Variant
@@ -210,8 +226,204 @@ Private Sub transcribe_data(source_sheet As Worksheet, dest_sheet As Worksheet, 
             If IsNumeric(ary_data(i)) = True And ary_data(i) <> 0 Then
                 dest_sheet.Cells(dest_row_count, j) = ary_data(i)
                 dest_sheet.Cells(dest_row_count, j - 1) = ary_title(i)
+                dest_row_count = dest_row_count + 1
             End If
         Next i
     Next j
         
+End Sub
+
+' 13. 出力先のフォルダ指定　⇒　データの転記
+Private Sub get_folder_name_and_transcribe_data(source_file_name As String, source_sheet As Worksheet, source_start_row As Long, source_end_row As Long, password As String)
+
+
+    ' 14. 出力先フォルダ名を取得
+'    Dim dest_folder_path As String
+'    dest_folder_path = get_folder_name(source_file_name, password)
+    
+    ' 15. ファイル名称を設定
+    Dim file_name As String
+    file_name = get_file_name(source_file_name, password)
+    
+    ' 16. 出力先フォルダを作成(Excel)
+    Dim dest_excel_folder_path As String
+    dest_excel_folder_path = create_excel_folder()
+    
+    ' 17. 出力先フォルダを作成(PDF)
+    Dim dest_pdf_folder_path As String
+    dest_pdf_folder_path = create_pdf_folder()
+
+    ' 18. データ転記処理
+    Call Module1.transcribe_data_process(file_name, dest_excel_folder_path, dest_pdf_folder_path, source_sheet, source_start_row, source_end_row)
+    
+End Sub
+
+Private Function get_file_name(source_file_name As String, password As String)
+
+    Dim file_name As Variant
+    file_name = Application.InputBox(prompt:="出力ファイル名", Type:=2)
+    
+    If file_name = False Then
+        Workbooks(source_file_name).Close
+        Call Module1.worksheet_protect(password)
+        Call Module1.workbook_protect(password)
+        End
+    Else
+       get_file_name = file_name
+    End If
+    
+End Function
+
+' 15. 出力先フォルダ名を取得
+Private Function get_folder_name(source_file_name As String, password As String) As String
+
+    Dim dlg As Object
+    Dim blAns As Boolean
+    Set dlg = Application.FileDialog(msoFileDialogFolderPicker)
+    blAns = dlg.Show
+        If blAns Then
+            get_folder_name = dlg.SelectedItems(1)
+        Else
+            Workbooks(source_file_name).Close
+            Call Module1.worksheet_protect(password)
+            Call Module1.worksheet_protect(password)
+            End
+        End If
+        
+End Function
+
+' 16. 出力先フォルダを作成(Excel)
+Private Function create_excel_folder() As String
+    MkDir ThisWorkbook.Path & "\" & Format(Now, "yyyymmdd_hhmmss") & "_excel"
+    Dim dest_folder_path As String
+    dest_folder_path = ThisWorkbook.Path & "\" & Format(Now, "yyyymmdd_hhmmss") & "_excel"
+    create_excel_folder = dest_folder_path
+End Function
+
+' 17. 出力先フォルダを作成(PDF)
+Private Function create_pdf_folder() As String
+    MkDir ThisWorkbook.Path & "\" & Format(Now, "yyyymmdd_hhmmss") & "_pdf"
+    Dim dest_pdf_folder_path As String
+    dest_pdf_folder_path = ThisWorkbook.Path & "\" & Format(Now, "yyyymmdd_hhmmss") & "_pdf"
+    create_pdf_folder = dest_pdf_folder_path
+End Function
+
+' 18 データ転記処理
+Private Sub transcribe_data_process(file_name As String, dest_excel_folder_path As String, dest_pdf_folder_path As String, source_sheet As Worksheet, source_start_row As Long, source_end_row As Long)
+    
+    Dim staff_name As String
+    Dim staff_code As String
+    Dim dest_file_name As String
+    Dim dest_sheet As Worksheet
+    Dim pdf_file_name As String
+    Dim ary_data As Variant
+    Dim ary_name As Variant
+    Dim i As Long
+    Dim j As Long
+    
+    For j = 3 To source_sheet.Cells(source_start_row - 1, source_sheet.Columns.Count).End(xlToLeft).Column - 1
+        ' 社員名
+        staff_name = source_sheet.Cells(source_start_row - 1, j)
+        
+        ' 所属コード
+        staff_code = source_sheet.Cells(source_start_row - 2, j)
+        
+        ' 19. 出力先のファイル作成
+        dest_file_name = create_dest_files(file_name, dest_excel_folder_path, staff_name)
+        
+        ' 出力先シート
+        Set dest_sheet = Workbooks(dest_file_name).Worksheets("Sheet1")
+        
+        ' 20. 社員名と所属コードの転記
+        Call Module1.describe_staff_info(dest_sheet, staff_name, staff_code)
+        
+        
+        ary_data = Array()
+        ary_name = Array()
+        
+        Dim payment_counter As Long
+        Dim deduction_counter As Long
+        payment_counter = 8
+        deduction_counter = 8
+        
+        For i = 0 To source_end_row - source_start_row
+            ReDim Preserve ary_data(UBound(ary_data) + 1)
+            ary_data(i) = source_sheet.Cells(i + source_start_row, j)
+            ReDim Preserve ary_name(UBound(ary_name) + 1)
+            ary_name(i) = source_sheet.Cells(i + source_start_row, j - 1)
+            If IsNumeric(ary_data(i)) = True And ary_data(i) <> 0 Then
+                ' 21. 転記
+                Call Module1.search_describe_cell(dest_file_name, ary_data(i), ary_name(i), payment_counter, deduction_counter)
+            End If
+        Next i
+        
+        pdf_file_name = dest_pdf_folder_path & "\" & staff_name & "_" & Year(Now) & file_name & ".pdf"
+        dest_sheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:=pdf_file_name, OpenAfterPublish:=False
+        
+        Workbooks(dest_file_name).Close SaveChanges:=True
+        
+    Next j
+    
+End Sub
+
+' 19. 出力先のファイル作成
+Private Function create_dest_files(file_name As String, dest_excel_folder_path As String, staff_name) As String
+    
+    Dim template_file As String
+    Dim staff_file As String
+    template_file = ThisWorkbook.Path & "\template_bonus.xlsx"
+    staff_file = dest_excel_folder_path & "\" & staff_name & "_" & Year(Now) & file_name & ".xlsx"
+    FileCopy template_file, staff_file
+    Workbooks.Open Filename:=staff_file
+    create_dest_files = Application.ActiveWorkbook.Name
+
+End Function
+
+' 20. 社員名と所属コードの転記
+Private Sub describe_staff_info(dest_sheet As Worksheet, staff_name As String, staff_code As String)
+    Dim i As Long
+    Dim j As Long
+    
+    For j = 1 To 20
+        For i = 1 To 30
+            Select Case dest_sheet.Cells(i, j)
+                Case Is = "氏　名"
+                    dest_sheet.Cells(i, j + 1) = staff_name & "　様"
+                Case Is = "所属コード"
+                    dest_sheet.Cells(i, j + 1) = staff_code
+            End Select
+        Next i
+    Next j
+    
+End Sub
+
+' 21. 転記
+Private Sub search_describe_cell(dest_file_name As String, ary_data As Variant, ary_name As Variant, payment_counter As Long, deduction_counter As Long)
+    ' 出力先シートの指定
+    Dim dest_sheet As Worksheet
+    Dim search_sheet As Worksheet
+    Set dest_sheet = Workbooks(dest_file_name).Worksheets("Sheet1")
+    Set search_sheet = Workbooks(dest_file_name).Worksheets("Sheet2")
+    
+    Dim i As Long
+    Dim j As Long
+    
+    For j = 1 To 20
+        For i = 1 To 30
+            If search_sheet.Cells(i, j) = ary_name Then
+                If j = 5 And ary_name <> "支給合計" Then
+                    dest_sheet.Cells(payment_counter, j) = ary_name
+                    dest_sheet.Cells(payment_counter, j + 1) = ary_data
+                    payment_counter = payment_counter + 1
+                ElseIf j = 8 And ary_name <> "控除合計" Then
+                    dest_sheet.Cells(deduction_counter, j) = ary_name
+                    dest_sheet.Cells(deduction_counter, j + 1) = ary_data
+                    deduction_counter = deduction_counter + 1
+                Else
+                    dest_sheet.Cells(i, j) = ary_name
+                    dest_sheet.Cells(i, j + 1) = ary_data
+                End If
+            End If
+        Next i
+    Next j
 End Sub
