@@ -1,12 +1,40 @@
+Public Sub book_protect(book_name As String, password As String)
+
+    Workbooks(book_name).Protect (password)
+    
+End Sub
+
 Public Sub book_unprotect(book_name As String, password As String)
     
     Workbooks(book_name).unprotect (password)
     
 End Sub
 
+Public Sub sheet_protect(book_name As String, sheet_name As String, password As String)
+
+    Workbooks(book_name).Worksheets(sheet_name).Protect (password)
+    
+End Sub
  
 Public Sub sheet_unprotect(book_name As String, sheet_name As String, password As String)
 
     Workbooks(book_name).Worksheets(sheet_name).unprotect (password)
     
 End Sub
+
+Public Sub file_open()
+    
+    CreateObject("WScript.Shell").currentdirectory = ThisWorkbook.Path
+    
+    Dim file_path As Variant
+    file_path = Application.GetOpenFilename()
+    
+    If file_path = False Then
+    
+        End
+    Else
+        Workbooks.Open Filename:=file_path
+    End If
+    
+End Sub
+
