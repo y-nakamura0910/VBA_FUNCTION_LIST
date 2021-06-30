@@ -38,4 +38,15 @@ Public Sub file_open()
     
 End Sub
 
+Public Function set_sheet(book_name As String, sheet_name As String)
+    
+    set_sheet = Workbooks(book_name).Worksheets(sheet_name)
+    
+End Function
 
+Public Function get_end_row(data_sheet As Worksheet, title_column As Long) As Long
+
+    data_sheet.Activate
+    get_end_row = Cells(Rows.Count, title_column).End(xlDown).Row
+    
+End Function
