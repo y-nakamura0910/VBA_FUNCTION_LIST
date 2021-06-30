@@ -24,7 +24,7 @@ End Sub
 
 Public Sub file_open()
     
-    CreateObject("WScript.Shell").currentdirectory = ThisWorkbook.Path
+    CreateObject("WScript.Shell").currentdirectory = ThisWorkbook.path
     
     Dim file_path As Variant
     file_path = Application.GetOpenFilename()
@@ -50,3 +50,27 @@ Public Function get_end_row(data_sheet As Worksheet, title_column As Long) As Lo
     get_end_row = Cells(Rows.Count, title_column).End(xlDown).Row
     
 End Function
+
+Public Sub create_folder(folder_path As String, folder_name As String)
+
+    Dim create_folder_path As String
+    create_folder_path = folder_path & "\" & folder_name
+    MkDir create_folder_path
+    
+End Sub
+
+Public Sub sheet_visible(book_name As String)
+    
+    Dim ws As Variant
+    
+    For Each ws In Workbooks(book_name).Worksheets
+        ws.Visible
+    Next ws
+    
+End Sub
+
+Public Sub sheet_invisible(book_name As String, sheet_name As String)
+
+    Workbooks(book_name).Worksheets(sheet_name).Visible = False
+    
+End Sub
