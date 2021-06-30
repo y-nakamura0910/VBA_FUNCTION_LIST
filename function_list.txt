@@ -1,11 +1,11 @@
-Private Sub book_unprotect(book_name As String, password As String)
+Public Sub book_unprotect(book_name As String, password As String)
     
-    Workbooks(workbool_name).unprotect (password)
+    Workbooks(book_name).unprotect (password)
     
 End Sub
 
-
-Private Sub sheet_unprotect(book_name As String, sheet_name As String, password As String)
+ 
+Public Sub sheet_unprotect(book_name As String, sheet_name As String, password As String)
 
     Workbooks(book_name).Worksheets(sheet_name).unprotect (password)
     
