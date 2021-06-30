@@ -30,11 +30,12 @@ Public Sub file_open()
     file_path = Application.GetOpenFilename()
     
     If file_path = False Then
-    
+        ' 終了処理を記述
         End
     Else
         Workbooks.Open Filename:=file_path
     End If
     
 End Sub
+
 
