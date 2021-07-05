@@ -30,7 +30,7 @@ Public Sub file_open()
     file_path = Application.GetOpenFilename()
     
     If file_path = False Then
-        ' 終了処理を記述
+        ' 終了処理を
         End
     Else
         Workbooks.Open Filename:=file_path
@@ -74,3 +74,20 @@ Public Sub sheet_invisible(book_name As String, sheet_name As String)
     Workbooks(book_name).Worksheets(sheet_name).Visible = False
     
 End Sub
+
+Public Function get_search_words() As Variant
+    
+    Dim search_words As Variant
+    Dim keywords As Variant
+    search_words = Application.InputBox(prompt:="検索ワードを入力してください", Type:=2)
+    
+    If search_words = False Then
+        ' 終了処理
+        End
+    Else
+        search_words = Replace(search_words, "　", " ")
+        keywords = Split(search_words, " ")
+        get_search_words = keywords
+    End If
+    
+End Function
