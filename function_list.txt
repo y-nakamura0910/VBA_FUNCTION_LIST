@@ -1,93 +1,11 @@
-Public Sub book_protect(book_name As String, password As String)
+  ' ブックの保護
+ Workbooks("Book1").Protect Password:="pass"
 
-    Workbooks(book_name).Protect (password)
-    
-End Sub
-
-Public Sub book_unprotect(book_name As String, password As String)
-    
-    Workbooks(book_name).unprotect (password)
-    
-End Sub
-
-Public Sub sheet_protect(book_name As String, sheet_name As String, password As String)
-
-    Workbooks(book_name).Worksheets(sheet_name).Protect (password)
-    
-End Sub
+' ブックの保護解除
+ Workbooks("Book1").Unprotect Password:="pass"
  
-Public Sub sheet_unprotect(book_name As String, sheet_name As String, password As String)
+ ' ワークシートの保護
+ Worksheets(1).Protect Password:="pass"
 
-    Workbooks(book_name).Worksheets(sheet_name).unprotect (password)
-    
-End Sub
-
-Public Sub file_open()
-    
-    CreateObject("WScript.Shell").currentdirectory = ThisWorkbook.path
-    
-    Dim file_path As Variant
-    file_path = Application.GetOpenFilename()
-    
-    If file_path = False Then
-        ' 終了処理を
-        End
-    Else
-        Workbooks.Open Filename:=file_path
-    End If
-    
-End Sub
-
-Public Function set_sheet(book_name As String, sheet_name As String)
-    
-    set_sheet = Workbooks(book_name).Worksheets(sheet_name)
-    
-End Function
-
-Public Function get_end_row(data_sheet As Worksheet, title_column As Long) As Long
-
-    data_sheet.Activate
-    get_end_row = Cells(Rows.Count, title_column).End(xlDown).Row
-    
-End Function
-
-Public Sub create_folder(folder_path As String, folder_name As String)
-
-    Dim create_folder_path As String
-    create_folder_path = folder_path & "\" & folder_name
-    MkDir create_folder_path
-    
-End Sub
-
-Public Sub sheet_visible(book_name As String)
-    
-    Dim ws As Variant
-    
-    For Each ws In Workbooks(book_name).Worksheets
-        ws.Visible
-    Next ws
-    
-End Sub
-
-Public Sub sheet_invisible(book_name As String, sheet_name As String)
-
-    Workbooks(book_name).Worksheets(sheet_name).Visible = False
-    
-End Sub
-
-Public Function get_search_words() As Variant
-    
-    Dim search_words As Variant
-    Dim keywords As Variant
-    search_words = Application.InputBox(prompt:="検索ワードを入力してください", Type:=2)
-    
-    If search_words = False Then
-        ' 終了処理
-        End
-    Else
-        search_words = Replace(search_words, "　", " ")
-        keywords = Split(search_words, " ")
-        get_search_words = keywords
-    End If
-    
-End Function
+ ' ワークシートの保護解除
+ Worksheets(1).Unprotect Password:="pass"
