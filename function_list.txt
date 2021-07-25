@@ -1,11 +1,27 @@
-  ' ブックの保護
- Workbooks("Book1").Protect Password:="pass"
+' ブックの保護
+Workbooks("Book1").Protect Password:="pass"
 
 ' ブックの保護解除
- Workbooks("Book1").Unprotect Password:="pass"
- 
- ' ワークシートの保護
- Worksheets(1).Protect Password:="pass"
+Workbooks("Book1").Unprotect Password:="pass"
 
- ' ワークシートの保護解除
- Worksheets(1).Unprotect Password:="pass"
+' ワークシートの保護
+Workbooks("Book1").Worksheets(1).Protect Password:="pass"
+
+' ワークシートの保護解除
+Workbooks("Book1").Worksheets(1).Unprotect Password:="pass"
+
+' カレントフォルダーを設定
+CreateObject("WScript.Shell").CurrentDirectory = Thisworkbook.Path
+
+' ユーザーに開くファイルを選択してもらう
+Dim FileName As Variant
+FileName = GetOpenFileName()
+
+If FileName = False Then
+  Exit Sub
+End If
+
+Workbooks.Open FileName
+
+' アクティブブック名の取得
+ActiveWorkbook.Name
