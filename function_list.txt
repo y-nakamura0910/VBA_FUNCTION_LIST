@@ -25,3 +25,14 @@ Workbooks.Open FileName
 
 ' アクティブブック名の取得
 ActiveWorkbook.Name
+
+' 画面表示の更新をオン
+Application.ScreenUpdating = True
+
+' 画面表示の更新をオフ
+Application.ScreenUpdating = False
+
+' 配列に格納されている値を残したまま、配列の要素数を変更
+Dim  arr As Variant
+arr = Array()
+Redim Preserve arr(UBound(arr) + 1)
