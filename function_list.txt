@@ -32,7 +32,33 @@ Application.ScreenUpdating = True
 ' 画面表示の更新をオフ
 Application.ScreenUpdating = False
 
+' 配列を設定
+Dim arr As Variant
+arr = Array("東京", "大阪", "名古屋")
+
 ' 配列に格納されている値を残したまま、配列の要素数を変更
 Dim  arr As Variant
 arr = Array()
 Redim Preserve arr(UBound(arr) + 1)
+
+' 最大値を求める
+WorksheetFunction.Max(20, 30, 10)
+
+' 格子状の罫線を引く
+Range(“B2:D4”).Borders.LineStyle = xlContinuous
+
+' セルに塗りつぶしの色の設定
+Range("A1").Interior.Color = RGB(255, 0, 0)
+
+' ページ設定
+With ActiveSheet.PageSetup
+  .PrintArea = "A1" & ":" & "D20"  ' 印刷範囲
+  .Zoom = False                    ' 拡大/縮小の設定を無効
+  .FitToPagesWide = 1              ' 1ページに収める(横)
+  .FitToPagesTall = 1              ' 1ページに収める(縦)
+  .CenterHorizontally = True       ' 真ん中に配置(横)
+  .CenterVertically = True         ' 真ん中に配置(縦)
+End With
+
+' 特定のシートをPDF出力
+Worksheets("Sheet1").ExportAsFixedFormat Type:=xlTypePDF, Filename:=exPath, OpenAfterPublish:=False
