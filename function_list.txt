@@ -62,3 +62,6 @@ End With
 
 ' 特定のシートをPDF出力
 Worksheets("Sheet1").ExportAsFixedFormat Type:=xlTypePDF, Filename:=exPath, OpenAfterPublish:=False
+
+' ユーザーフォームを開く
+UserForm1.Show
