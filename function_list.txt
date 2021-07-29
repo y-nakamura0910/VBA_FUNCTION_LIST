@@ -23,6 +23,17 @@ End If
 
 Workbooks.Open FileName
 
+' ユーザーに使用するフォルダを選択してもらう
+Dim folderPath As String
+
+With Application.FileDialog(msoFileDialogFolderPicker)
+  .InitialFileName = ThisWorkbook.Path
+  If .Show = 0 Then
+    End
+  End if
+  folderPath = .SelectedItems(1)
+End with
+
 ' アクティブブック名の取得
 ActiveWorkbook.Name
 
@@ -47,6 +58,9 @@ WorksheetFunction.Max(20, 30, 10)
 ' 格子状の罫線を引く
 Range(“B2:D4”).Borders.LineStyle = xlContinuous
 
+' 文字色を設定
+Range("B2").Font.ColorIndex = 3
+
 ' セルに塗りつぶしの色の設定
 Range("A1").Interior.Color = RGB(255, 0, 0)
 
@@ -65,3 +79,33 @@ Worksheets("Sheet1").ExportAsFixedFormat Type:=xlTypePDF, Filename:=exPath, Open
 
 ' ユーザーフォームを開く
 UserForm1.Show
+
+' ユーザーフォーム非表示
+UserForm1.Hide
+
+' ワークブックをアクティブにする
+Workbooks("Book1.xlsx").Activate
+
+' ループをスキップ
+Dim i As Integer
+
+For i = 1 To 3
+
+  If i = 2 Then
+    GoTo Continue
+  End if
+
+  Debug.Print(i)
+
+Continue:
+Next
+
+' ファイルが存在するかどうかを判定し、引数に指定したファイルが存在するとファイル名を返す。
+Dim buf As String
+buf = Dir("C:\Sample\Book1.xls")
+
+' ハイパーリンクを設定
+ActiveSheet.Hyperlinks.Add Anchor:=Cells(i, 2), Address:=Cells(i, 3).Value, TextToDisplay:="ひょうじもじれつ"
+
+' 列の幅を設定
+Columns(2).ColumnWidth = 20
